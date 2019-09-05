@@ -1,0 +1,21 @@
+{
+  "name": "henrik/session",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "description": "Session",
+  "authors": [
+    {
+      "name": "Henrik Karapetyan",
+      "email": "henrikkarapetyan@gmail.com"
+    }
+  ],
+  "require": {
+    "henrik/container": "^1.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "henrik\\session\\": "src/"
+    }
+  }
+}
