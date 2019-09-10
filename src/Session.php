@@ -374,7 +374,9 @@ class Session
      */
     public function get($key, $alt = null)
     {
-        $this->resumeSession();
+        if(!$this->resumeSession()){
+            $this->start();
+        }
         return isset($_SESSION[$this->getSegmentName()][$key])
             ? $_SESSION[$this->getSegmentName()][$key]
             : $alt;
