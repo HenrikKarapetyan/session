@@ -8,6 +8,7 @@ use henrik\container\Container;
 use henrik\container\ContainerModes;
 use henrik\container\exceptions\IdAlreadyExistsException;
 use henrik\container\exceptions\UndefinedModeException;
+use Hk\Contracts\Session\CookieManagerInterface;
 
 /**
  * Class CookieManager.

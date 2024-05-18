@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Henrik\Session;
 
+use Hk\Contracts\Session\CookieInterface;
+use Hk\Contracts\Session\SessionInterface;
+
 /**
  * Class Session.
  *
@@ -44,7 +47,7 @@ class Session implements SessionInterface
      * @param string                 $savePath
      * @param callable|null          $deleteCookie
      */
-    public function __construct(array $cookies = [], string $savePath = '', ?callable $deleteCookie = null)
+    public function __construct(array $cookies = [], string $savePath = '/', ?callable $deleteCookie = null)
     {
         $this->setName($this->name);
         $this->setCookies($cookies);

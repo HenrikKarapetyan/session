@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Henrik\Session;
 
+use Hk\Contracts\Session\CookieInterface;
+
 /**
  * Class Cookie.
  */

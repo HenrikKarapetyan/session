@@ -6,3 +6,7 @@ phpmd-report.html
 .php-cs-fixer.cache
 
 public
+
+sess
+
+examples
