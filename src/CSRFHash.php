@@ -1,36 +1,27 @@
 <?php
-/**
- * Author Henrik Karapetyan
- * Copyright (c) 2018.
- */
+
+declare(strict_types=1);
+
+namespace Henrik\Session;
+
+use Exception;
 
 /**
- * Created by PhpStorm.
- * User: Henrik
- * Date: 6/17/2018
- * Time: 9:45 AM
+ * Class CSRFHash.
  */
-
-namespace henrik\session;
-
-/**
- * Class CSRFHash
- * @package henrik\session\src
- */
-class CSRFHash
+class CSRFHash implements CSRFHashInterface
 {
+    /**
+     * @var string $hash
+     */
+    private string $hash;
 
     /**
-     * @var $hash string
+     * {@inheritDoc}
+     *
+     * @throws Exception
      */
-    private $hash;
-
-    /**
-     * @param $value
-     * @return bool
-     * @throws \Exception
-     */
-    public function isValid($value)
+    public function isValid(string $value): bool
     {
         if (function_exists('hash_equals')) {
             return hash_equals($value, $this->getValue());
@@ -40,21 +31,23 @@ class CSRFHash
     }
 
     /**
-     * @return string
-     * @throws \Exception
+     * {@inheritDoc}
+     *
+     * @throws Exception
      */
-    public function getValue()
+    public function getValue(): string
     {
         if (empty($this->hash)) {
             $this->regenerateValue();
         }
+
         return $this->hash;
     }
 
     /**
-     * @throws \Exception
+     * {@inheritDoc}
      */
-    public function regenerateValue()
+    public function regenerateValue(): void
     {
         $this->hash = hash('sha512', RandomHashGenerator::generate());
     }

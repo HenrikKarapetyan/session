@@ -1,146 +1,116 @@
 <?php
 
-namespace henrik\session;
+declare(strict_types=1);
 
+namespace Henrik\Session;
 
 /**
- * Class Session
- * @package henrik\session
+ * Class Session.
+ *
+ * @SuppressWarnings(PHPMD.Superglobals)
  */
-class Session
+class Session implements SessionInterface
 {
-    /**
-     *
-     */
-    const FLASH_NEXT = 'Flash_Next';
-    /**
-     *
-     */
-    const FLASH_NOW = 'Flash_Now';
+    public const FLASH_NEXT = 'FLASH_NEXT';
+    public const FLASH_NOW  = 'FLASH_NOW';
 
     /**
-     * @var
+     * @var array<CookieInterface>
      */
-    protected $cookies;
+    protected array $cookies;
     /**
-     * @var array
+     * @var array<int|string, bool|string|int>
      */
-    protected $cookie_params = array();
+    protected array $cookieParams = [];
     /**
-     * @var null
+     * @var callable|null
      */
-    protected $delete_cookie;
+    protected $deleteCookie;
     /**
      * @var bool
      */
-    protected $flash_moved = false;
+    protected bool $flashMoved = false;
     /**
      * @var string
      */
-    protected $name = 'default-session';
-    /**
-     * @var
-     */
-    protected $segment_name;
+    protected string $name = 'default';
+
+    protected ?string $segmentName = null;
 
     /**
      * Session constructor.
-     * @param array $cookies
-     * @param string $save_path
-     * @param null $delete_cookie
+     *
+     * @param array<CookieInterface> $cookies
+     * @param string                 $savePath
+     * @param callable|null          $deleteCookie
      */
-    public function __construct($cookies = [], $save_path = '', $delete_cookie = null)
+    public function __construct(array $cookies = [], string $savePath = '', ?callable $deleteCookie = null)
     {
         $this->setName($this->name);
         $this->setCookies($cookies);
-        $this->delete_cookie = $delete_cookie;
+        $this->deleteCookie = $deleteCookie;
         $this->setDeleteCookie();
-        $this->cookie_params = session_get_cookie_params();
-        $this->setSavePath($save_path);
+        $this->cookieParams = session_get_cookie_params();
+        $this->setSavePath($savePath);
     }
 
     /**
-     *
+     * {@inheritDoc}
      */
-    public function setDeleteCookie()
+    public function setDeleteCookie(): void
     {
-        if (!$this->delete_cookie) {
-            $this->delete_cookie = function ($name, $params) {
+        if (!$this->deleteCookie) {
+            $this->deleteCookie = function ($name, $params) {
                 setcookie($name, '', time() - 42000, $params['path'], $params['domain']);
             };
         }
     }
 
     /**
-     * @return bool
+     * {@inheritDoc}
      */
-    public function isResumable()
+    public function isResumable(): bool
     {
         return isset($this->cookies[$this->getName()]);
     }
 
     /**
-     * @return bool
+     * {@inheritDoc}
      */
-    public function isStarted()
+    public function isStarted(): bool
     {
+        $started = $this->sessionStatus();
+
         if (function_exists('session_status')) {
             $started = session_status() === PHP_SESSION_ACTIVE;
-        } else {
-            $started = $this->sessionStatus();
         }
 
         // if the session was started externally, move the flash values forward
-        if ($started && !$this->flash_moved) {
+        if ($started && !$this->flashMoved) {
             $this->moveFlash();
         }
 
-        // done
         return $started;
     }
 
     /**
-     * @return bool
+     * {@inheritDoc}
      */
-    protected function sessionStatus()
-    {
-        $setting = 'session.use_trans_sid';
-        $current = ini_get($setting);
-        $level = error_reporting(0);
-        $result = ini_set($setting, $current);
-        error_reporting($level);
-        return $result !== $current;
-    }
-
-    /**
-     * @return bool
-     */
-    public function start()
+    public function start(): bool
     {
         $result = session_start();
+
         if ($result) {
             $this->moveFlash();
         }
+
         return $result;
     }
 
     /**
-     *
+     * {@inheritDoc}
      */
-    protected function moveFlash()
-    {
-        if (!isset($_SESSION[Session::FLASH_NEXT])) {
-            $_SESSION[Session::FLASH_NEXT] = array();
-        }
-        $_SESSION[Session::FLASH_NOW] = $_SESSION[Session::FLASH_NEXT];
-        $_SESSION[Session::FLASH_NEXT] = array();
-        $this->flash_moved = true;
-    }
-
-    /**
-     * @return bool
-     */
-    public function resume()
+    public function resume(): bool
     {
         if ($this->isStarted()) {
             return true;
@@ -154,339 +124,272 @@ class Session
     }
 
     /**
-     *
+     * {@inheritDoc}
      */
-    public function clear()
+    public function clear(): bool
     {
         return session_unset();
     }
 
     /**
-     *
+     * {@inheritDoc}
      */
-    public function commit()
+    public function commit(): bool
     {
         return session_write_close();
     }
 
     /**
-     * @return bool
+     * {@inheritDoc}
      */
-    public function destroy()
+    public function destroy(): bool
     {
         if (!$this->isStarted()) {
             $this->start();
         }
 
-        $name = $this->getName();
+        $name   = $this->getName();
         $params = $this->getCookieParams();
         $this->clear();
 
         $destroyed = session_destroy();
-        if ($destroyed) {
-            call_user_func($this->delete_cookie, $name, $params);
+
+        if ($destroyed && $this->deleteCookie) {
+            call_user_func($this->deleteCookie, $name, $params);
         }
 
         return $destroyed;
     }
 
-    // ======================================================================= //
-
     /**
-     * @param $expire
-     * @return int
+     * {@inheritDoc}
      */
-    public function setCacheExpire($expire)
+    public function setCacheExpire(int $expire): false|int
     {
         return session_cache_expire($expire);
     }
 
     /**
-     * @return int
+     * {@inheritDoc}
      */
-    public function getCacheExpire()
+    public function getCacheExpire(): false|int
     {
         return session_cache_expire();
     }
 
     /**
-     * @param $limiter
-     * @return string
+     * {@inheritDoc}
      */
-    public function setCacheLimiter($limiter)
+    public function setCacheLimiter(string $limiter): false|string
     {
         return session_cache_limiter($limiter);
     }
 
     /**
-     * @param $cookies
+     * {@inheritDoc}
      */
-    public function setCookies($cookies)
+    public function setCookies(array $cookies): void
     {
         $this->cookies = $cookies;
-        /**
-         * @var $cookie Cookie
-         */
-        foreach ($cookies as $id => $cookie) {
+
+        foreach ($cookies as $cookie) {
             setcookie($cookie->getName(), $cookie->getValue(), $cookie->getExpire(), $cookie->getPath(), $cookie->getDomain());
         }
     }
 
     /**
-     * @return string
+     * {@inheritDoc}
      */
-    public function getCacheLimiter()
+    public function getCacheLimiter(): false|string
     {
         return session_cache_limiter();
     }
 
     /**
-     * @param array $params
+     * {@inheritDoc}
      */
-    public function setCookieParams(array $params)
+    public function setCookieParams(array $params): void
     {
-        $this->cookie_params = array_merge($this->cookie_params, $params);
+        $this->cookieParams = array_merge($this->cookieParams, $params);
         session_set_cookie_params(
-            $this->cookie_params['lifetime'],
-            $this->cookie_params['path'],
-            $this->cookie_params['domain'],
-            $this->cookie_params['secure'],
-            $this->cookie_params['httponly']
+            (int) $this->cookieParams['lifetime'],
+            (string) $this->cookieParams['path'],
+            (string) $this->cookieParams['domain'],
+            (bool) $this->cookieParams['secure'],
+            (bool) $this->cookieParams['httponly']
         );
     }
 
     /**
-     * @return array
+     * {@inheritDoc}
      */
-    public function getCookieParams()
+    public function getCookieParams(): array
     {
-        return $this->cookie_params;
+        return $this->cookieParams;
     }
 
     /**
-     * @return string
+     * {@inheritDoc}
      */
-    public function getId()
+    public function getId(): false|string
     {
         return session_id();
     }
 
     /**
-     * @param $name
-     * @return string
+     * {@inheritDoc}
      */
-    public function setName($name)
+    public function setName(string $name): false|string
     {
         return session_name($name);
     }
 
     /**
-     * @return string
+     * {@inheritDoc}
      */
-    public function getName()
+    public function getName(): false|string
     {
         return session_name();
     }
 
     /**
-     * @param $path
-     * @return string
+     * {@inheritDoc}
      */
-    public function setSavePath($path)
+    public function setSavePath(string $path): false|string
     {
         return session_save_path($path);
     }
 
     /**
-     * @return string
+     * {@inheritDoc}
      */
-    public function getSavePath()
+    public function getSavePath(): false|string
     {
         return session_save_path();
     }
 
     /**
-     * @return mixed
+     * {@inheritDoc}
      */
-    public function getSegmentName()
+    public function getSegmentName(): ?string
     {
-        if (is_null($this->segment_name)) {
-            $this->segment_name = "default";
+        if (is_null($this->segmentName)) {
+            $this->segmentName = 'default';
         }
-        return $this->segment_name;
+
+        return $this->segmentName;
     }
 
     /**
-     * @param mixed $segment_name
+     * {@inheritDoc}
      */
-    public function setSegmentName($segment_name)
+    public function setSegmentName(string $segmentName): void
     {
 
-        $this->segment_name = $segment_name;
+        $this->segmentName = $segmentName;
     }
 
-
     /**
-     *
-     * Sets a flash value for the *next* request *and* the current one.
-     *
-     * @param string $key The key for the flash value.
-     *
-     * @param mixed $val The flash value itself.
-     *
+     * {@inheritDoc}
      */
-    public function setFlashNow($key, $val)
+    public function setFlashNow(string $key, mixed $val): void
     {
         $this->resumeOrStartSession();
-        $_SESSION[Session::FLASH_NOW][$this->getSegmentName()][$key] = $val;
+        $_SESSION[Session::FLASH_NOW][$this->getSegmentName()][$key]  = $val;
         $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()][$key] = $val;
     }
 
     /**
-     *
-     * Gets the flash value for a key in the *next* request.
-     *
-     * @param string $key The key for the flash value.
-     *
-     * @param mixed $alt An alternative value to return if the key is not set.
-     *
-     * @return mixed The flash value itself.
-     *
+     * {@inheritDoc}
      */
-    public function getFlashNext($key, $alt = null)
+    public function getFlashNext(string $key, mixed $alt = null): mixed
     {
         $this->resumeSession();
+
         return isset($_SESSION[Session::FLASH_NEXT][$this->getSegmentName()][$key])
             ? $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()][$key]
             : $alt;
     }
 
     /**
-     *
-     * Returns the value of a key in the segment.
-     *
-     * @param string $key The key in the segment.
-     *
-     * @param mixed $alt An alternative value to return if the key is not set.
-     *
-     * @return mixed
-     *
+     * {@inheritDoc}
      */
-    public function get($key, $alt = null)
+    public function get(string $key, mixed $alt = null): mixed
     {
-        if(!$this->resumeSession()){
+        if (!$this->resumeSession()) {
             $this->start();
         }
+
         return isset($_SESSION[$this->getSegmentName()][$key])
             ? $_SESSION[$this->getSegmentName()][$key]
             : $alt;
     }
 
-
     /**
-     *
-     * Sets the value of a key in the segment.
-     *
-     * @param string $key The key to set.
-     *
-     * @param mixed $val The value to set it to.
-     *
+     * {@inheritDoc}
      */
-    public function set($key, $val)
+    public function set(string $key, mixed $val): void
     {
         $this->resumeOrStartSession();
         $_SESSION[$this->getSegmentName()][$key] = $val;
     }
 
-
     /**
-     *
-     * Clear all data from the segment.
-     *
-     * @return void
-     *
+     * {@inheritDoc}
      */
-    public function clearSegment()
+    public function clearSegment(): void
     {
         if ($this->resumeSession()) {
-            $_SESSION[$this->getSegmentName()] = array();
+            $_SESSION[$this->getSegmentName()] = [];
         }
     }
 
     /**
-     *
-     * Sets a flash value for the *next* request.
-     *
-     * @param string $key The key for the flash value.
-     *
-     * @param mixed $val The flash value itself.
-     *
+     * {@inheritDoc}
      */
-    public function setFlash($key, $val)
+    public function setFlash(string $key, mixed $val): void
     {
         $this->resumeOrStartSession();
         $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()][$key] = $val;
     }
 
-
     /**
-     *
-     * Gets the flash value for a key in the *current* request.
-     *
-     * @param string $key The key for the flash value.
-     *
-     * @param mixed $alt An alternative value to return if the key is not set.
-     *
-     * @return mixed The flash value itself.
-     *
+     * {@inheritDoc}
      */
-    public function getFlash($key, $alt = null)
+    public function getFlash(string $key, mixed $alt = null): mixed
     {
         $this->resumeSession();
+
         return isset($_SESSION[Session::FLASH_NOW][$this->getSegmentName()][$key])
             ? $_SESSION[Session::FLASH_NOW][$this->getSegmentName()][$key]
             : $alt;
     }
 
     /**
-     *
-     * Clears flash values for *only* the next request.
-     *
-     * @return void
-     *
+     * {@inheritDoc}
      */
-    public function clearFlash()
+    public function clearFlash(): void
     {
         if ($this->resumeSession()) {
-            $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()] = array();
-        }
-    }
-
-
-    /**
-     *
-     * Clears flash values for *both* the next request *and* the current one.
-     *
-     * @return void
-     *
-     */
-    public function clearFlashNow()
-    {
-        if ($this->resumeSession()) {
-            $_SESSION[Session::FLASH_NOW][$this->getSegmentName()] = array();
-            $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()] = array();
+            $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()] = [];
         }
     }
 
     /**
-     *
-     * Retains all the current flash values for the next request; values that
-     * already exist for the next request take precedence.
-     *
-     * @return void
-     *
+     * {@inheritDoc}
      */
-    public function keepFlash()
+    public function clearFlashNow(): void
+    {
+        if ($this->resumeSession()) {
+            $_SESSION[Session::FLASH_NOW][$this->getSegmentName()]  = [];
+            $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()] = [];
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function keepFlash(): void
     {
         if ($this->resumeSession()) {
             $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()] = array_merge(
@@ -496,19 +399,41 @@ class Session
         }
     }
 
+    /**
+     * @return bool
+     */
+    protected function sessionStatus(): bool
+    {
+        $setting = 'session.use_trans_sid';
+        $current = ini_get($setting);
+        $level   = error_reporting(0);
+        $result  = ini_set($setting, $current);
+        error_reporting($level);
+
+        return $result !== $current;
+    }
+
+    protected function moveFlash(): void
+    {
+        if (!isset($_SESSION[Session::FLASH_NEXT])) {
+            $_SESSION[Session::FLASH_NEXT] = [];
+        }
+        $_SESSION[Session::FLASH_NOW]  = $_SESSION[Session::FLASH_NEXT];
+        $_SESSION[Session::FLASH_NEXT] = [];
+        $this->flashMoved              = true;
+    }
 
     /**
-     *
      * Loads the segment only if the session has already been started, or if
      * a session is available (in which case it resumes the session first).
      *
      * @return bool
-     *
      */
-    protected function resumeSession()
+    protected function resumeSession(): bool
     {
         if ($this->isStarted() || $this->resume()) {
             $this->load();
+
             return true;
         }
 
@@ -516,13 +441,11 @@ class Session
     }
 
     /**
-     *
      * Sets the segment properties to $_SESSION references.
      *
      * @return void
-     *
      */
-    protected function load()
+    protected function load(): void
     {
         if (!isset($_SESSION[$this->getSegmentName()])) {
             $_SESSION[$this->getSegmentName()] = [];
@@ -537,20 +460,16 @@ class Session
         }
     }
 
-
     /**
-     *
      * Resumes a previous session, or starts a new one, and loads the segment.
      *
      * @return void
-     *
      */
-    protected function resumeOrStartSession()
+    protected function resumeOrStartSession(): void
     {
         if (!$this->resumeSession()) {
             $this->start();
             $this->load();
         }
     }
-
 }

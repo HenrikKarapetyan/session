@@ -1,64 +1,66 @@
 <?php
 
-namespace henrik\session;
+declare(strict_types=1);
 
+namespace Henrik\Session;
+
+use Exception;
 
 /**
- * Class CSRFToken
- * @package henrik\session
+ * Class CSRFToken.
  */
-class CSRFToken
+class CSRFToken implements CSRFTokenInterface
 {
     /**
      * @var Session
      */
-    protected $session;
+    protected Session $session;
 
     /**
      * @var CSRFHash
      */
-    private $csrfHash;
+    private CSRFHash $csrfHash;
 
     /**
      * CsrfToken constructor.
-     * @param Session $session
+     *
+     * @param Session  $session
      * @param CSRFHash $csrfHash
-     * @throws \Exception
+     *
+     * @throws Exception
      */
     public function __construct(Session $session, CSRFHash $csrfHash)
     {
-        $this->session = $session;
+        $this->session  = $session;
         $this->csrfHash = $csrfHash;
-        $this->session->setSegmentName("csrf");
+        $this->session->setSegmentName('csrf');
         $this->regenerateValue();
     }
 
     /**
-     * @throws \Exception
+     *{@inheritDoc}
+     *
+     * @throws Exception
      */
-    public function regenerateValue()
+    public function regenerateValue(): void
     {
         $this->session->set('value', $this->csrfHash->getValue());
     }
 
     /**
-     * @param $value
-     * @return bool
-     * @throws \Exception
+     *{@inheritDoc}
+     *
+     * @throws Exception
      */
-    public function isValid($value)
+    public function isValid(string $value): bool
     {
         return $this->csrfHash->isValid($value);
     }
 
     /**
-     *
-     * Gets the value of the CSRF token.
-     *
-     * @return string
-     *
+     *{@inheritDoc}
      */
-    public function getValue()
+    public function getValue(): mixed
     {
         return $this->session->get('value');
     }

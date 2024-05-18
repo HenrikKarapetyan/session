@@ -1,71 +1,58 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Henrik
- * Date: 2/4/2018
- * Time: 4:37 PM
- */
 
-namespace henrik\session;
+declare(strict_types=1);
 
+namespace Henrik\Session;
 
 /**
- * Class Cookie
- * @package henrik\session
+ * Class Cookie.
  */
-class Cookie
+class Cookie implements CookieInterface
 {
-    /**
-     * @var
-     */
-    private $name;
-    /**
-     * @var
-     */
-    private $value;
+    private string $name;
+
+    private string $value;
     /**
      * @var int
      */
-    private $expire = 0; // old value is '0'
+    private int $expire = 0;
     /**
      * @var string
      */
-    private $path = '/';
-    /**
-     * @var
-     */
-    private $domain;
+    private string $path = '/';
+
+    private string $domain;
     /**
      * @var bool
      */
-    private $secure = false;
+    private bool $secure = false;
     /**
      * @var bool
      */
-    private $httpOnly = true;
-
+    private bool $httpOnly = true;
 
     /**
-     * @param $expire
+     * @param int $expire
      */
-    public function setExpire($expire)
+    public function setExpire(int $expire): void
     {
-        $this->expire = null;
-        if ($expire !== null) {
-            $this->expire = $this->isValidTimeStamp($expire) ? $expire : strtotime($expire);
+        if ($this->isValidTimeStamp($expire)) {
+            $this->expire = $expire;
         }
     }
 
     /**
-     * @param bool $expire_session_cookies
+     * @param bool $expireSessionCookies
+     *
      * @return bool
      */
-    public function isExpired($expire_session_cookies = false)
+    public function isExpired(bool $expireSessionCookies = false): bool
     {
-        if (!$this->expire && $expire_session_cookies) {
+        if (!$this->expire && $expireSessionCookies) {
             return true;
-        } else if (!$this->expire) {
-            // FIXME Usage of ELSE IF is discouraged; use ELSEIF instead
+        }
+
+        if (!$this->expire) {
             return false;
         }
 
@@ -73,29 +60,17 @@ class Cookie
     }
 
     /**
-     * @param $timestamp
-     * @return bool
+     * @param string $name
      */
-    private function isValidTimeStamp($timestamp)
-    {
-        return (((int)$timestamp === $timestamp) ||
-                ((string)(int)$timestamp === $timestamp)) &&
-            ($timestamp <= PHP_INT_MAX) &&
-            ($timestamp >= ~PHP_INT_MAX);
-    }
-
-    /**
-     * @param mixed $name
-     */
-    public function setName($name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
 
     /**
-     * @param mixed $value
+     * @param string $value
      */
-    public function setValue($value)
+    public function setValue(string $value): void
     {
         $this->value = $value;
     }
@@ -103,15 +78,15 @@ class Cookie
     /**
      * @param string $path
      */
-    public function setPath($path)
+    public function setPath(string $path): void
     {
         $this->path = $path;
     }
 
     /**
-     * @param mixed $domain
+     * @param string $domain
      */
-    public function setDomain($domain)
+    public function setDomain(string $domain): void
     {
         $this->domain = $domain;
     }
@@ -119,31 +94,31 @@ class Cookie
     /**
      * @param bool $secure
      */
-    public function setSecure($secure)
+    public function setSecure(bool $secure): void
     {
         $this->secure = $secure;
     }
 
     /**
-     * @param $httpOnly
+     * @param bool $httpOnly
      */
-    public function setHttpOnly($httpOnly)
+    public function setHttpOnly(bool $httpOnly): void
     {
         $this->httpOnly = $httpOnly;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getValue()
+    public function getValue(): string
     {
         return $this->value;
     }
@@ -151,7 +126,7 @@ class Cookie
     /**
      * @return int
      */
-    public function getExpire()
+    public function getExpire(): int
     {
         return $this->expire;
     }
@@ -159,15 +134,15 @@ class Cookie
     /**
      * @return string
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getDomain()
+    public function getDomain(): string
     {
         return $this->domain;
     }
@@ -175,7 +150,7 @@ class Cookie
     /**
      * @return bool
      */
-    public function getSecure()
+    public function isSecure(): bool
     {
         return $this->secure;
     }
@@ -183,8 +158,18 @@ class Cookie
     /**
      * @return bool
      */
-    public function getHttpOnly()
+    public function isHttpOnly(): bool
     {
         return $this->httpOnly;
+    }
+
+    /**
+     * @param int $timestamp
+     *
+     * @return bool
+     */
+    private function isValidTimeStamp(int $timestamp): bool
+    {
+        return ($timestamp <= PHP_INT_MAX) && ($timestamp >= ~PHP_INT_MAX);
     }
 }

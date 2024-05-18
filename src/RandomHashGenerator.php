@@ -1,33 +1,23 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Henrik
- * Date: 1/24/2018
- * Time: 1:15 PM
- */
 
-namespace henrik\session;
+declare(strict_types=1);
 
-use henrik\session\exceptions\HashGenerationException;
+namespace Henrik\Session;
+
+use Exception;
+use Henrik\Session\Exceptions\HashGenerationException;
 
 /**
- * Class RandomHashGenerator
- * @package sparrow\security
+ * Class RandomHashGenerator.
  */
 class RandomHashGenerator
 {
     /**
-     * RandomValueGenerator constructor.
-     */
-    public function __construct()
-    {
-    }
-
-    /**
+     * @throws Exception
+     *
      * @return string
-     * @throws \Exception
      */
-    public static function generate()
+    public static function generate(): string
     {
         $bytes = 32;
 
@@ -39,9 +29,9 @@ class RandomHashGenerator
             return openssl_random_pseudo_bytes($bytes);
         }
 
-        $message = "Cannot generate cryptographically secure random values. "
+        $message = 'Cannot generate cryptographically secure random values. '
             . "Please install extension 'openssl' or 'mcrypt', or use "
-            . "another cryptographically secure implementation.";
+            . 'another cryptographically secure implementation.';
 
         throw new HashGenerationException($message);
     }

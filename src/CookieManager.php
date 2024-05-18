@@ -1,40 +1,35 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Henrik
- * Date: 2/4/2018
- * Time: 5:01 PM
- */
 
-namespace henrik\session;
+declare(strict_types=1);
 
+namespace Henrik\Session;
 
 use henrik\container\Container;
 use henrik\container\ContainerModes;
+use henrik\container\exceptions\IdAlreadyExistsException;
+use henrik\container\exceptions\UndefinedModeException;
 
 /**
- * Class CookieManager
- * @package henrik\session
+ * Class CookieManager.
  */
-class CookieManager extends Container
+class CookieManager extends Container implements CookieManagerInterface
 {
-
-
     /**
      * CookieManager constructor.
-     * @throws \henrik\container\UndefinedModeException
+     *
+     * @throws UndefinedModeException
      */
     public function __construct()
     {
-        $this->change_mode(ContainerModes::SINGLE_VALUE_MODE);
+        $this->changeMode(ContainerModes::SINGLE_VALUE_MODE);
     }
 
     /**
      * @param callable $callback
-     * @throws \henrik\container\exceptions\IdAlreadyExistsException
-     * @throws \henrik\container\exceptions\TypeException
+     *
+     * @throws IdAlreadyExistsException
      */
-    public function newCookie(callable $callback)
+    public function newCookie(callable $callback): void
     {
         $cookie = new Cookie();
         $callback($cookie);
@@ -42,12 +37,10 @@ class CookieManager extends Container
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getCookies()
+    public function getCookies(): array
     {
         return $this->getAll();
     }
-
-
 }
