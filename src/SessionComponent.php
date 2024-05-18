@@ -17,7 +17,7 @@ class SessionComponent extends BaseComponent
                     'id'     => SessionInterface::class,
                     'class'  => Session::class,
                     'params' => [
-                        'savePath' => __DIR__ . $this->getBasePath() . '/var/session',
+                        'savePath' => $this->getBasePath() . '/var/session/',
                     ],
                 ],
 
