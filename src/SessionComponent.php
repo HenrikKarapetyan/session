@@ -2,15 +2,13 @@
 
 namespace Henrik\Session;
 
-use Hk\Contracts\ComponentInterface;
+use Hk\Contracts\BaseComponent;
 use Hk\Contracts\Enums\ServiceScope;
 use Hk\Contracts\Session\CookieManagerInterface;
 use Hk\Contracts\Session\SessionInterface;
 
-class SessionComponent implements ComponentInterface
+class SessionComponent extends BaseComponent
 {
-    private string $basePath = '';
-
     public function getServices(): array
     {
         return [
@@ -29,35 +27,5 @@ class SessionComponent implements ComponentInterface
                 ],
             ],
         ];
-    }
-
-    public function getControllersPath(): string
-    {
-        return '';
-    }
-
-    public function getTemplatesPath(): string
-    {
-        return '';
-    }
-
-    public function getEventSubscribers(): array
-    {
-        return [];
-    }
-
-    public function dependsOn(): array
-    {
-        return [];
-    }
-
-    public function setBasePath(string $basePath): void
-    {
-        $this->basePath = $basePath;
-    }
-
-    public function getBasePath(): string
-    {
-        return $this->basePath;
     }
 }
