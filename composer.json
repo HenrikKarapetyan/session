@@ -11,7 +11,7 @@
     }
   ],
   "require": {
-    "henrik/container": "^2.0.1",
+    "henrik/container": "dev-master",
     "henrik/contracts": "dev-main"
   },
   "autoload": {
@@ -23,7 +23,7 @@
     "phpmd/phpmd": "^2.15",
     "friendsofphp/php-cs-fixer": "dev-master",
     "phpstan/phpstan": "2.0.x-dev",
-    "henrik/dependency-injector": "^1"
+    "henrik/dependency-injector": "dev-master"
   },
   "scripts": {
     "phpstan": [

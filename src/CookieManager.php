@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Henrik\Session;
 
-use henrik\container\Container;
-use henrik\container\ContainerModes;
-use henrik\container\exceptions\IdAlreadyExistsException;
-use henrik\container\exceptions\UndefinedModeException;
+use Henrik\Container\Container;
+use Henrik\Container\ContainerModes;
+use Henrik\Container\Exceptions\KeyAlreadyExistsException;
+use Henrik\Container\Exceptions\UndefinedModeException;
 use Hk\Contracts\Session\CookieManagerInterface;
 
 /**
@@ -28,7 +28,7 @@ class CookieManager extends Container implements CookieManagerInterface
     /**
      * @param callable $callback
      *
-     * @throws IdAlreadyExistsException
+     * @throws KeyAlreadyExistsException
      */
     public function newCookie(callable $callback): void
     {
