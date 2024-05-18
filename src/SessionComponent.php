@@ -9,6 +9,8 @@ use Hk\Contracts\Session\SessionInterface;
 
 class SessionComponent implements ComponentInterface
 {
+    private string $basePath = '';
+
     public function getServices(): array
     {
         return [
@@ -17,7 +19,7 @@ class SessionComponent implements ComponentInterface
                     'id'     => SessionInterface::class,
                     'class'  => Session::class,
                     'params' => [
-                        'savePath' => __DIR__ . '/../../../var/session',
+                        'savePath' => __DIR__ . $this->getBasePath() . '/var/session',
                     ],
                 ],
 
@@ -47,5 +49,15 @@ class SessionComponent implements ComponentInterface
     public function dependsOn(): array
     {
         return [];
+    }
+
+    public function setBasePath(string $basePath): void
+    {
+        $this->basePath = $basePath;
+    }
+
+    public function getBasePath(): string
+    {
+        return $this->basePath;
     }
 }

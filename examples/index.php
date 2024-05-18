@@ -1,13 +1,9 @@
 <?php
 
-use Henrik\Session\Session;
-
-require '../vendor/autoload.php';
-
-$session = new Session([], '../sess');
+$session = require 'main.php';
 
 $session->start();
-
-var_dump($session->getFlash('asd', 'asdasdasdasdasdsadas'));
+$session->setFlash('xxx', 'xxxxxxxx');
+var_dump($session->getFlash('asd'));
 
 var_dump($_COOKIE);

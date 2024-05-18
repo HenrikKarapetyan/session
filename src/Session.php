@@ -193,7 +193,7 @@ class Session implements SessionInterface
      */
     public function setCookies(array $cookies): void
     {
-        $this->cookies = $cookies;
+        $this->cookies[] = $cookies;
 
         foreach ($cookies as $cookie) {
             setcookie($cookie->getName(), $cookie->getValue(), $cookie->getExpire(), $cookie->getPath(), $cookie->getDomain());
