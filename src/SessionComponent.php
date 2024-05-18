@@ -2,8 +2,8 @@
 
 namespace Henrik\Session;
 
-use henrik\sl\ServiceScope;
 use Hk\Contracts\ComponentInterface;
+use Hk\Contracts\Enums\ServiceScope;
 use Hk\Contracts\Session\CookieManagerInterface;
 use Hk\Contracts\Session\SessionInterface;
 
