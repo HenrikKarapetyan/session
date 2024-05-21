@@ -7,13 +7,14 @@ namespace Henrik\Session;
 use Henrik\Session\Exceptions\CannotParseCookieParamsException;
 use Hk\Contracts\Session\CookieInterface;
 use InvalidArgumentException;
+use Stringable;
 
 /**
  * Class Cookie.
  *
  * @SuppressWarnings(PHPMD)
  */
-class Cookie implements CookieInterface
+class Cookie implements CookieInterface, Stringable
 {
     private string $name;
 
@@ -36,6 +37,31 @@ class Cookie implements CookieInterface
      * @var bool
      */
     private bool $httpOnly = true;
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        $cookie = $this->name . '=' . rawurlencode($this->value);
+
+        if ($this->expire !== 0) {
+            $cookie .= '; Expires=' . gmdate('r', $this->expire);
+        }
+
+        $cookie .= '; Domain=' . $this->domain;
+        $cookie .= '; Path=' . $this->path;
+
+        if ($this->secure) {
+            $cookie .= '; Secure';
+        }
+
+        if ($this->httpOnly) {
+            $cookie .= '; HttpOnly';
+        }
+
+        return $cookie;
+    }
 
     /**
      * Creates a cookie from the contents of a Set-Cookie header.
