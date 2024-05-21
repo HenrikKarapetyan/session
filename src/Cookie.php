@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Henrik\Session;
 
+use Henrik\Session\Exceptions\CannotParseCookieParamsException;
 use Hk\Contracts\Session\CookieInterface;
+use InvalidArgumentException;
 
 /**
  * Class Cookie.
+ *
+ * @SuppressWarnings(PHPMD)
  */
 class Cookie implements CookieInterface
 {
@@ -34,13 +38,101 @@ class Cookie implements CookieInterface
     private bool $httpOnly = true;
 
     /**
-     * @param int $expire
+     * Creates a cookie from the contents of a Set-Cookie header.
+     *
+     * @param string $string
+     *
+     * @throws InvalidArgumentException         if the cookie string is not valid
+     * @throws CannotParseCookieParamsException
+     *
+     * @return Cookie the cookie
      */
-    public function setExpire(int $expire): void
+    public static function parse(string $string): self
+    {
+        $parts = preg_split('/;\s*/', $string);
+
+        if ($parts) {
+            $nameValue = explode('=', array_shift($parts), 2);
+
+            if (count($nameValue) !== 2) {
+                throw new InvalidArgumentException('The cookie string is not valid.');
+            }
+
+            [$name, $value] = $nameValue;
+
+            if ($name === '') {
+                throw new InvalidArgumentException('The cookie string is not valid.');
+            }
+
+            if ($value === '') {
+                throw new InvalidArgumentException('The cookie string is not valid.');
+            }
+
+            $value    = rawurldecode($value);
+            $expires  = 0;
+            $path     = null;
+            $domain   = null;
+            $secure   = false;
+            $httpOnly = false;
+
+            foreach ($parts as $part) {
+                switch (strtolower($part)) {
+                    case 'secure':
+                        $secure = true;
+
+                        break;
+
+                    case 'httponly':
+                        $httpOnly = true;
+
+                        break;
+
+                    default:
+                        $elements = explode('=', $part, 2);
+
+                        if (count($elements) === 2) {
+                            switch (strtolower($elements[0])) {
+                                case 'expires':
+                                    // Using @ to suppress the timezone warning, might not be the best thing to do.
+                                    if (is_int($time = @strtotime($elements[1]))) {
+                                        $expires = $time;
+                                    }
+
+                                    break;
+
+                                case 'path':
+                                    $path = $elements[1];
+
+                                    break;
+
+                                case 'domain':
+                                    $domain = strtolower(ltrim($elements[1], '.'));
+                            }
+                        }
+                }
+            }
+
+            return (new Cookie())->setExpire($expires)->setPath((string) $path)
+                ->setDomain((string) $domain)
+                ->setSecure($secure)
+                ->setHttpOnly($httpOnly);
+        }
+
+        throw new CannotParseCookieParamsException();
+    }
+
+    /**
+     * @param int $expire
+     *
+     * @return Cookie
+     */
+    public function setExpire(int $expire): self
     {
         if ($this->isValidTimeStamp($expire)) {
             $this->expire = $expire;
         }
+
+        return $this;
     }
 
     /**
@@ -63,50 +155,74 @@ class Cookie implements CookieInterface
 
     /**
      * @param string $name
+     *
+     * @return Cookie
      */
-    public function setName(string $name): void
+    public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
      * @param string $value
+     *
+     * @return Cookie
      */
-    public function setValue(string $value): void
+    public function setValue(string $value): self
     {
         $this->value = $value;
+
+        return $this;
     }
 
     /**
      * @param string $path
+     *
+     * @return Cookie
      */
-    public function setPath(string $path): void
+    public function setPath(string $path): self
     {
         $this->path = $path;
+
+        return $this;
     }
 
     /**
      * @param string $domain
+     *
+     * @return Cookie
      */
-    public function setDomain(string $domain): void
+    public function setDomain(string $domain): self
     {
         $this->domain = $domain;
+
+        return $this;
     }
 
     /**
      * @param bool $secure
+     *
+     * @return Cookie
      */
-    public function setSecure(bool $secure): void
+    public function setSecure(bool $secure): self
     {
         $this->secure = $secure;
+
+        return $this;
     }
 
     /**
      * @param bool $httpOnly
+     *
+     * @return Cookie
      */
-    public function setHttpOnly(bool $httpOnly): void
+    public function setHttpOnly(bool $httpOnly): self
     {
         $this->httpOnly = $httpOnly;
+
+        return $this;
     }
 
     /**
