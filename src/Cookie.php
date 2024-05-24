@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace Henrik\Session;
 
+use Henrik\Contracts\Session\CookieInterface;
 use Henrik\Session\Exceptions\CannotParseCookieParamsException;
-use Hk\Contracts\Session\CookieInterface;
 use InvalidArgumentException;
-use Stringable;
 
 /**
  * Class Cookie.
  *
  * @SuppressWarnings(PHPMD)
  */
-class Cookie implements CookieInterface, Stringable
+class Cookie implements CookieInterface
 {
     private string $name;
 

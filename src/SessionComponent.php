@@ -2,10 +2,11 @@
 
 namespace Henrik\Session;
 
-use Hk\Contracts\BaseComponent;
-use Hk\Contracts\Enums\ServiceScope;
-use Hk\Contracts\Session\CookieManagerInterface;
-use Hk\Contracts\Session\SessionInterface;
+use Henrik\Contracts\BaseComponent;
+use Henrik\Contracts\Enums\ServiceScope;
+use Henrik\Contracts\Session\CookieManagerInterface;
+use Henrik\Contracts\Session\SessionInterface;
+use Henrik\Contracts\Utils\MarkersInterface;
 
 class SessionComponent extends BaseComponent
 {
@@ -17,7 +18,7 @@ class SessionComponent extends BaseComponent
                     'id'     => SessionInterface::class,
                     'class'  => Session::class,
                     'params' => [
-                        'savePath' => $this->getBasePath() . '/var/session/',
+                        'savePath' => MarkersInterface::AS_SERVICE_PARAM_MARKER . 'sessionSavePath',
                     ],
                 ],
 

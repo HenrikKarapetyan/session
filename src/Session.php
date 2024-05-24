@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Henrik\Session;
 
-use Hk\Contracts\Session\CookieInterface;
-use Hk\Contracts\Session\SessionInterface;
+use Henrik\Contracts\Session\CookieInterface;
+use Henrik\Contracts\Session\SessionInterface;
+use Henrik\Session\Traits\SessionFlashTrait;
 
 /**
  * Class Session.
@@ -14,8 +15,7 @@ use Hk\Contracts\Session\SessionInterface;
  */
 class Session implements SessionInterface
 {
-    public const FLASH_NEXT = 'FLASH_NEXT';
-    public const FLASH_NOW  = 'FLASH_NOW';
+    use SessionFlashTrait;
 
     /**
      * @var array<CookieInterface>
@@ -29,10 +29,7 @@ class Session implements SessionInterface
      * @var callable|null
      */
     protected $deleteCookie;
-    /**
-     * @var bool
-     */
-    protected bool $flashMoved = false;
+
     /**
      * @var string
      */
@@ -295,28 +292,6 @@ class Session implements SessionInterface
     /**
      * {@inheritDoc}
      */
-    public function setFlashNow(string $key, mixed $val): void
-    {
-        $this->resumeOrStartSession();
-        $_SESSION[Session::FLASH_NOW][$this->getSegmentName()][$key]  = $val;
-        $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()][$key] = $val;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getFlashNext(string $key, mixed $alt = null): mixed
-    {
-        $this->resumeSession();
-
-        return isset($_SESSION[Session::FLASH_NEXT][$this->getSegmentName()][$key])
-            ? $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()][$key]
-            : $alt;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function get(string $key, mixed $alt = null): mixed
     {
         if (!$this->resumeSession()) {
@@ -348,61 +323,6 @@ class Session implements SessionInterface
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function setFlash(string $key, mixed $val): void
-    {
-        $this->resumeOrStartSession();
-        $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()][$key] = $val;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getFlash(string $key, mixed $alt = null): mixed
-    {
-        $this->resumeSession();
-
-        return isset($_SESSION[Session::FLASH_NOW][$this->getSegmentName()][$key])
-            ? $_SESSION[Session::FLASH_NOW][$this->getSegmentName()][$key]
-            : $alt;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function clearFlash(): void
-    {
-        if ($this->resumeSession()) {
-            $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()] = [];
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function clearFlashNow(): void
-    {
-        if ($this->resumeSession()) {
-            $_SESSION[Session::FLASH_NOW][$this->getSegmentName()]  = [];
-            $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()] = [];
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function keepFlash(): void
-    {
-        if ($this->resumeSession()) {
-            $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()] = array_merge(
-                $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()],
-                $_SESSION[Session::FLASH_NOW][$this->getSegmentName()]
-            );
-        }
-    }
-
-    /**
      * @return bool
      */
     protected function sessionStatus(): bool
@@ -414,16 +334,6 @@ class Session implements SessionInterface
         error_reporting($level);
 
         return $result !== $current;
-    }
-
-    protected function moveFlash(): void
-    {
-        if (!isset($_SESSION[Session::FLASH_NEXT])) {
-            $_SESSION[Session::FLASH_NEXT] = [];
-        }
-        $_SESSION[Session::FLASH_NOW]  = $_SESSION[Session::FLASH_NEXT];
-        $_SESSION[Session::FLASH_NEXT] = [];
-        $this->flashMoved              = true;
     }
 
     /**
@@ -454,13 +364,7 @@ class Session implements SessionInterface
             $_SESSION[$this->getSegmentName()] = [];
         }
 
-        if (!isset($_SESSION[Session::FLASH_NOW][$this->getSegmentName()])) {
-            $_SESSION[Session::FLASH_NOW][$this->getSegmentName()] = [];
-        }
-
-        if (!isset($_SESSION[Session::FLASH_NEXT][$this->getSegmentName()])) {
-            $_SESSION[Session::FLASH_NEXT][$this->getSegmentName()] = [];
-        }
+        $this->loadFlashes();
     }
 
     /**
