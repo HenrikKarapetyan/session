@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Henrik\Session;
 
 use Henrik\Contracts\BaseComponent;
@@ -22,6 +24,16 @@ class SessionComponent extends BaseComponent
                         'cookies'  => MarkersInterface::AS_SERVICE_PARAM_MARKER . 'cookies',
                         'name'     => MarkersInterface::AS_SERVICE_PARAM_MARKER . 'sessionName',
                     ],
+                ],
+
+                [
+                    'id'    => CSRFHashInterface::class,
+                    'class' => CSRFHash::class,
+                ],
+
+                [
+                    'id'    => CSRFTokenInterface::class,
+                    'class' => CSRFToken::class,
                 ],
 
                 [

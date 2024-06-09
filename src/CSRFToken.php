@@ -5,22 +5,13 @@ declare(strict_types=1);
 namespace Henrik\Session;
 
 use Exception;
+use Henrik\Contracts\Session\SessionInterface;
 
 /**
  * Class CSRFToken.
  */
 class CSRFToken implements CSRFTokenInterface
 {
-    /**
-     * @var Session
-     */
-    protected Session $session;
-
-    /**
-     * @var CSRFHash
-     */
-    private CSRFHash $csrfHash;
-
     /**
      * CsrfToken constructor.
      *
@@ -29,7 +20,7 @@ class CSRFToken implements CSRFTokenInterface
      *
      * @throws Exception
      */
-    public function __construct(Session $session, CSRFHash $csrfHash)
+    public function __construct(protected SessionInterface $session, private CSRFHashInterface $csrfHash)
     {
         $this->session  = $session;
         $this->csrfHash = $csrfHash;
