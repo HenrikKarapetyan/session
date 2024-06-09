@@ -22,8 +22,6 @@ class CSRFToken implements CSRFTokenInterface
      */
     public function __construct(protected SessionInterface $session, private CSRFHashInterface $csrfHash)
     {
-        $this->session  = $session;
-        $this->csrfHash = $csrfHash;
         $this->session->setSegmentName('csrf');
         $this->regenerateValue();
     }
