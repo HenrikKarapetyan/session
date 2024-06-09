@@ -12,7 +12,8 @@
   ],
   "require": {
     "henrik/container": "dev-master",
-    "henrik/contracts": "dev-main"
+    "henrik/contracts": "dev-main",
+    "henrik/filesystem": "dev-main"
   },
   "autoload": {
     "psr-4": {

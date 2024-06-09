@@ -6,6 +6,7 @@ namespace Henrik\Session;
 
 use Henrik\Contracts\Session\CookieInterface;
 use Henrik\Contracts\Session\SessionInterface;
+use Henrik\Filesystem\Filesystem;
 use Henrik\Session\Traits\SessionFlashTrait;
 
 /**
@@ -41,8 +42,8 @@ class Session implements SessionInterface
      * Session constructor.
      *
      * @param array<CookieInterface> $cookies
-     * @param string                 $savePath
-     * @param callable|null          $deleteCookie
+     * @param string $savePath
+     * @param callable|null $deleteCookie
      */
     public function __construct(array $cookies = [], string $savePath = '/', ?callable $deleteCookie = null)
     {
@@ -148,7 +149,7 @@ class Session implements SessionInterface
             $this->start();
         }
 
-        $name   = $this->getName();
+        $name = $this->getName();
         $params = $this->getCookieParams();
         $this->clear();
 
@@ -212,11 +213,11 @@ class Session implements SessionInterface
     {
         $this->cookieParams = array_merge($this->cookieParams, $params);
         session_set_cookie_params(
-            (int) $this->cookieParams['lifetime'],
-            (string) $this->cookieParams['path'],
-            (string) $this->cookieParams['domain'],
-            (bool) $this->cookieParams['secure'],
-            (bool) $this->cookieParams['httponly']
+            (int)$this->cookieParams['lifetime'],
+            (string)$this->cookieParams['path'],
+            (string)$this->cookieParams['domain'],
+            (bool)$this->cookieParams['secure'],
+            (bool)$this->cookieParams['httponly']
         );
     }
 
@@ -257,6 +258,9 @@ class Session implements SessionInterface
      */
     public function setSavePath(string $path): false|string
     {
+        if (!is_dir($path)) {
+            Filesystem::mkdir($path);
+        }
         return session_save_path($path);
     }
 
@@ -329,8 +333,8 @@ class Session implements SessionInterface
     {
         $setting = 'session.use_trans_sid';
         $current = ini_get($setting);
-        $level   = error_reporting(0);
-        $result  = ini_set($setting, $current);
+        $level = error_reporting(0);
+        $result = ini_set($setting, $current);
         error_reporting($level);
 
         return $result !== $current;
