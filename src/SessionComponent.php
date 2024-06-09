@@ -19,6 +19,8 @@ class SessionComponent extends BaseComponent
                     'class'  => Session::class,
                     'params' => [
                         'savePath' => MarkersInterface::AS_SERVICE_PARAM_MARKER . 'sessionSavePath',
+                        'cookies'  => MarkersInterface::AS_SERVICE_PARAM_MARKER . 'cookies',
+                        'name'     => MarkersInterface::AS_SERVICE_PARAM_MARKER . 'sessionName',
                     ],
                 ],
 
