@@ -10,8 +10,10 @@ use Henrik\Contracts\Session\SessionInterface;
 /**
  * Class CSRFToken.
  */
-class CSRFToken implements CSRFTokenInterface
+class CSRFToken implements CSRFTokenInterface, SessionSegmentInterface
 {
+    public const CSRF_SEGMENT_KEY = '_csrf';
+
     /**
      * CsrfToken constructor.
      *
@@ -22,7 +24,7 @@ class CSRFToken implements CSRFTokenInterface
      */
     public function __construct(protected SessionInterface $session, private CSRFHashInterface $csrfHash)
     {
-        $this->session->setSegmentName('csrf');
+        $this->session->setSegment($this);
         $this->regenerateValue();
     }
 
@@ -52,5 +54,10 @@ class CSRFToken implements CSRFTokenInterface
     public function getValue(): mixed
     {
         return $this->session->get('value');
+    }
+
+    public function getSegmentName(): string
+    {
+        return self::CSRF_SEGMENT_KEY;
     }
 }
