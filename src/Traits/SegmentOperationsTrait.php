@@ -4,7 +4,6 @@ namespace Henrik\Session\Traits;
 
 trait SegmentOperationsTrait
 {
-
     /**
      * {@inheritDoc}
      */

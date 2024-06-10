@@ -6,6 +6,7 @@ namespace Henrik\Session;
 
 use Henrik\Contracts\Session\CookieInterface;
 use Henrik\Contracts\Session\SessionInterface;
+use Henrik\Contracts\Session\SessionSegmentInterface;
 use Henrik\Session\Traits\SegmentOperationsTrait;
 use Henrik\Session\Traits\SessionControlTrait;
 use Henrik\Session\Traits\SessionCookieOptionsTrait;

@@ -6,6 +6,7 @@ namespace Henrik\Session;
 
 use Exception;
 use Henrik\Contracts\Session\SessionInterface;
+use Henrik\Contracts\Session\SessionSegmentInterface;
 
 /**
  * Class CSRFToken.
