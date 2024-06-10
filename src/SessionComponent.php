@@ -15,7 +15,7 @@ class SessionComponent extends BaseComponent
     public function getServices(): array
     {
         return [
-            ServiceScope::SINGLETON->value => [
+            ServiceScope::PROTOTYPE->value => [
                 [
                     'id'     => SessionInterface::class,
                     'class'  => Session::class,
@@ -25,6 +25,8 @@ class SessionComponent extends BaseComponent
                         'name'     => MarkersInterface::AS_SERVICE_PARAM_MARKER . 'sessionName',
                     ],
                 ],
+            ],
+            ServiceScope::SINGLETON->value => [
 
                 [
                     'id'    => CSRFHashInterface::class,
