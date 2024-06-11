@@ -2,6 +2,9 @@
 
 namespace Henrik\Session\Traits;
 
+/**
+ * @SuppressWarnings(PHPMD.Superglobals)
+ */
 trait SegmentOperationsTrait
 {
     /**

@@ -24,7 +24,14 @@ trait SessionCookieOptionsTrait
         $this->cookies = $cookies;
 
         foreach ($cookies as $cookie) {
-            setcookie($cookie->getName(), $cookie->getValue(), $cookie->getExpire(), $cookie->getPath(), $cookie->getDomain());
+            setcookie(
+                name: $cookie->getName(),
+                value: $cookie->getValue(),
+                secure: $cookie->getExpire(),
+                path: $cookie->getPath(),
+                domain: $cookie->getDomain(),
+                httponly: $cookie->isHttpOnly(),
+            );
         }
     }
 

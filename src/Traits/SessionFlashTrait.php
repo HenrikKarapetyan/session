@@ -105,11 +105,12 @@ trait SessionFlashTrait
 
     protected function moveFlash(): void
     {
-        if (!isset($_SESSION[self::FLASH_NEXT])) {
-            $_SESSION[self::FLASH_NEXT] = [];
+
+        if (!isset($_SESSION[self::FLASH_NEXT][$this->getSegmentName()])) {
+            $_SESSION[self::FLASH_NEXT][$this->getSegmentName()] = [];
         }
-        $_SESSION[self::FLASH_NOW]  = $_SESSION[self::FLASH_NEXT];
-        $_SESSION[self::FLASH_NEXT] = [];
-        $this->flashMoved           = true;
+        $_SESSION[self::FLASH_NOW][$this->getSegmentName()]  = $_SESSION[self::FLASH_NEXT][$this->getSegmentName()];
+        $_SESSION[self::FLASH_NEXT][$this->getSegmentName()] = [];
+        $this->flashMoved                                    = true;
     }
 }

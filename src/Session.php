@@ -50,12 +50,13 @@ class Session implements SessionInterface
      * Session constructor.
      *
      * @param array<CookieInterface> $cookies
+     * @param string                 $name
      * @param string                 $savePath
      * @param callable|null          $deleteCookie
      */
-    public function __construct(array $cookies = [], string $savePath = '/', ?callable $deleteCookie = null)
+    public function __construct(array $cookies = [], string $name = 'default', string $savePath = '/', ?callable $deleteCookie = null)
     {
-        $this->setName($this->name);
+        $this->setName($name);
         $this->setCookies($cookies);
         $this->deleteCookie = $deleteCookie;
         $this->setDeleteCookie();

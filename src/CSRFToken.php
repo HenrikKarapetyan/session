@@ -23,7 +23,7 @@ class CSRFToken implements CSRFTokenInterface, SessionSegmentInterface
      *
      * @throws Exception
      */
-    public function __construct(protected SessionInterface $session, private CSRFHashInterface $csrfHash)
+    public function __construct(protected SessionInterface $session, private readonly CSRFHashInterface $csrfHash)
     {
         $this->session->setSegment($this);
         $this->regenerateValue();
